@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../css/swiper.css" />
+    <link rel="stylesheet" type="text/css" href="../css/leftDelete.css" />
+            <style>
+            /* 三格图 */
+            
+            .half-floor-floor {
+                background: #fff;
+                margin: 10px 0px 10px 0px;
+                box-shadow: 0 1px 1px #dcdcdc;
+                overflow: hidden;
+            }
+            
+            .half-floor {
+                width: 50%;
+                border-width: 0 1px 0 0;
+                float: left;
+                margin-left: -1px;
+                border-right: 1px solid #dadada;
+            }
+            
+            .brand-up-floor,
+            .down-floor,
+            .up-floor {
+                width: 50%;
+                float: right;
+            }
+            .up-floor {
+                margin-top: -1px;
+                border-bottom: 1px solid #dadada;
+                border-width: 0 0 1px;
+            }
+        </style>
+</head>
+<body>
+	<div class="aui-content aui-margin-b-15">
+        <ul class="aui-list aui-media-list" id="notis">
+            
+        </ul>
+    </div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/config.js"></script>
+<script>
+	var user=$api.getStorage("user");
+	apiready=function(){
+		
+	
+		loadData();
+	}
+	
+	function loadData(){
+		var url=config.server1 + "/announcement/list.do?userId="+user.userId;
+		$api.get(url, function(result) {
+			result = eval('(' + result + ')');
+			if(result.success){
+				var notis=result.result;
+				var notisDom=$api.byId('notis');
+				for(var i=0;i<notis.length;i++){
+					var html="<li class=\"aui-list-item\">\n" +
+						"	<div class=\"aui-media-list-item-inner\">\n" +
+						"			<div class=\"aui-list-item-media\">\n" +
+						"					<img src=\"../image/demo2.png\" class=\"aui-img-round\">\n" +
+						"			</div>\n" +
+						"			<div class=\"aui-list-item-inner\">\n" +
+						"					<div class=\"aui-list-item-text\">\n" +
+						"							<div class=\"aui-list-item-title\">"+notis[i].title+"</div>\n" +
+						"							<div class=\"aui-list-item-right\">"+notis[i].createTime.substr(0,11)+" &nbsp;"+notis[i].createTime.substr(11,19)+"</div>\n" +
+						"					</div>\n" +
+//						"					<div class=\"aui-list-item-text\">\n" +
+//						"							第九次音乐测试\n" +
+//						"					</div>\n" +
+						"					<div class=\"aui-list-item-text\">\n" +
+						"							"+notis[i].content+"\n" +
+						"					</div>\n" +
+						"			</div>\n" +
+						"	</div>\n" +
+						"</li>";	
+					$api.append(notisDom, html);	
+				}
+			}	
+		});
+	}
+	
+	function openWin(name){
+        var delay = 0;
+        if(api.systemType != 'ios'){
+            delay = 300;
+        }
+        api.openWin({
+            name: ''+name+'',
+            url: ''+name+'_win.html',
+            bounces:false,
+            delay: delay,
+            slidBackEnabled:true,
+            vScrollBarEnabled:false
+        });
+    }
+
+</script>
+
+</html>

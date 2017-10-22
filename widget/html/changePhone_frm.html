@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>title</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css" />
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+		<style>
+			body {}
+		</style>
+	</head>
+
+	<body>
+		<div class="aui-content">
+
+			<ul class="aui-list aui-form-list">
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label">手机号：
+						</div>
+						<div class="aui-list-item-input">
+							<input type="number" placeholder="填写手机号">
+						</div>
+					</div>
+				</li>
+			</ul>
+			<div class="aui-col-xs-12">
+				<br />
+
+				<div class="aui-btn aui-btn-info aui-btn-block">
+					申请变更
+				</div>
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript">
+		
+	
+		apiready = function() {
+			
+		};
+		
+		/**
+		 * 发送验证码 
+		 */
+		function sendCheckCode(btn){
+			
+			$api.addCls(btn,"disabled");
+			btn.disabled='disabled';
+			
+			var i=60;//倒计时60秒
+			var timeIn=setInterval(function(){
+				btn.innerHTML=i+"s";
+				i--;
+			},1000);
+			
+			setTimeout(function(){
+				clearInterval(timeIn);
+				btn.innerHTML="发送验证码";
+				$api.removeAttr(btn,"disabled");
+			},(i+1)*1000);
+			
+			
+		}
+	</script>
+
+</html>

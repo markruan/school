@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+		<style type="text/css">
+			.aui-content {
+				padding-left: 40%;
+			}
+			.aui-timeline .aui-timeline-item-header {
+				left: -40px;
+			}
+			.gohome {
+				margin-left: 0.25 rem;
+				margin-right: 3.25 rem;
+				padding: 0;
+				position: relative;
+			}
+			.gohome div.aui-card-list {
+				left: -100%;
+			}
+			.gohome div.aui-card-list-header {
+				padding: 0.5 rem 0.95 rem;
+			}
+		</style>
+	</head>
+	<body>
+		<section class="aui-content">
+			<div class="aui-timeline" id="signs">
+				
+				
+			</div>
+		</section>
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript" src="../script/aui-collapse.js"></script>
+	<script type="text/javascript" src="../script/config.js"></script>
+	<script>
+		//格式化
+		Date.prototype.Format = function(fmt) {//author: meizz
+			var o = {
+				"M+" : this.getMonth() + 1, //月份
+				"d+" : this.getDate(), //日
+				"h+" : this.getHours(), //小时
+				"m+" : this.getMinutes(), //分
+				"s+" : this.getSeconds(), //秒
+				"q+" : Math.floor((this.getMonth() + 3) / 3), //季度
+				"S" : this.getMilliseconds() //毫秒
+			};
+			if (/(y+)/.test(fmt))
+				fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+			for (var k in o)
+			if (new RegExp("(" + k + ")").test(fmt))
+				fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+			return fmt;
+		}
+		
+		
+		var user = $api.getStorage("user");
+		apiready = function() {
+			api.parseTapmode();
+			loadSigns();
+		}
+		var collapse = new auiCollapse({
+			autoHide : false //是否自动隐藏已经展开的容器
+		});
+		function openWin(name) {
+			var delay = 0;
+			if (api.systemType != 'ios') {
+				delay = 300;
+			}
+			api.openWin({
+				name : '' + name + '',
+				url : '' + name + '_win.html',
+				bounces : false,
+				delay : delay,
+				slidBackEnabled : true,
+				vScrollBarEnabled : false
+			});
+			
+
+		}
+		
+		
+		/**
+			 *加载签到记录
+			 *
+			 */
+			
+		function loadSigns() {
+				$api.get(config.server1 + '/sign/getSign.do?parentPhoneNum=' + user.userNo + '&day=0', function(result) {
+					result = eval('(' + result + ')');
+					if (result.success) {
+						var signs=result.result;
+						if(signs){
+							for(var i=0;i<signs.length;i++){
+								var html=null;
+								if(signs[i].type==1){
+									//进校
+									html="<div class=\"aui-timeline-item-header\">\n" +
+									"					"+signs[i].time.substr(0,10)+"\n" +
+									"				</div>\n" +
+									"				<div class=\"aui-timeline-item\">\n" +
+									"					<div class=\"aui-timeline-item-label aui-bg-info text-light\">\n" +
+									"						"+signs[i].time.substr(11,19)+"\n" +
+									"					</div>\n" +
+									"					<div class=\"aui-timeline-item-inner\">\n" +
+									"						<div class=\"aui-card-list\">\n" +
+									"							<div class=\"aui-card-list-header aui-border-b\">\n" +
+									"								<div>\n" +
+									"									进入校门\n" +
+									"								</div>\n" +
+									"							</div>\n" +
+									"						</div>\n" +
+									"					</div>\n" +
+									"				</div>";
+									
+									
+									
+								}else{
+									//出校
+									html="<div class=\"aui-timeline-item\">\n" +
+									"					<div class=\"aui-timeline-item-label aui-bg-warning text-light\">\n" +
+									"						"+signs[i].time.substr(11,19)+"\n" +
+									"					</div>\n" +
+									"					<div class=\"gohome\">\n" +
+									"						<div class=\"aui-card-list\">\n" +
+									"							<div class=\"aui-card-list-header aui-border-b\">\n" +
+									"								<div>\n" +
+									"									走出校门\n" +
+									"								</div>\n" +
+									"							</div>\n" +
+									"						</div>\n" +
+									"					</div>\n" +
+									"				</div>";
+									
+								}
+								
+								$api.append($api.byId('signs'), html);
+							}
+						}
+					}
+				});
+			}
+	</script>
+</html>

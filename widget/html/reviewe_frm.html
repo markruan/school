@@ -1,0 +1,192 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../css/swiper.css" />
+    <link rel="stylesheet" type="text/css" href="../css/leftDelete.css" />
+            <style>
+            /* 三格图 */
+            
+            .half-floor-floor {
+                background: #fff;
+                margin: 10px 0px 10px 0px;
+                box-shadow: 0 1px 1px #dcdcdc;
+                overflow: hidden;
+            }
+            
+            .half-floor {
+                width: 50%;
+                border-width: 0 1px 0 0;
+                float: left;
+                margin-left: -1px;
+                border-right: 1px solid #dadada;
+            }
+            
+            .brand-up-floor,
+            .down-floor,
+            .up-floor {
+                width: 50%;
+                float: right;
+            }
+            .up-floor {
+                margin-top: -1px;
+                border-bottom: 1px solid #dadada;
+                border-width: 0 0 1px;
+            }
+        </style>
+</head>
+<body>
+	<div class="aui-content aui-margin-b-15">
+        <ul class="aui-list aui-media-list" id="reviews">
+           
+        </ul>
+    </div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-dialog.js" ></script>
+<script type="text/javascript" src="../script/swiper.js"></script>
+<script type="text/javascript" src="../script/art-template-native.js"></script>
+<script type="text/javascript" src="../script/config.js"></script>
+	<script>
+		var user=$api.getStorage("user");
+		var dialog = new auiDialog();
+		
+		
+		
+        apiready = function() {
+             api.parseTapmode(); 
+             loadData();     
+        };
+        
+        function loadData(){
+			$api.get(config.server1 + "/reviewe/list.do?teacherId=" + user.userId, function(result) {
+				result = eval('(' + result + ')');
+				if(result.success){
+					var reviews=result.result;
+					var reviewsDom=$api.byId('reviews');
+					reviewsDom.innerHTML='';
+					for(var i=0;i<reviews.length;i++){
+						var status='';
+						switch(reviews[i].status){
+							case 0:
+								status='待处理'.fontcolor('red');
+								break;
+								
+							case 1:
+								status='已同意'.fontcolor('green');
+								break;
+								
+							case 2:
+								status='已拒绝'.fontcolor('red');
+								break;		
+						}
+						
+						var html="<li class=\"aui-list-item swiper-container swiper-btn-2\"  >\n" +
+							"                <div class=\"swiper-wrapper\" id='wrapper_"+i+"'>\n" +
+							"                <div class=\"aui-media-list-item-inner swiper-slide\" >\n" +
+							"                    <div class=\"aui-list-item-media\">\n" +
+							"                        <img src=\"../image/demo"+reviews[i].type+".png\" class=\"aui-img-round\">\n" +
+							"                    </div>\n" +
+							"                    <div class=\"aui-list-item-inner\">\n" +
+							"                        <div class=\"aui-list-item-text\">\n" +
+							"                            <div class=\"aui-list-item-title\">"+reviews[i].studentName+"</div>\n" +
+							"                            <div class=\"aui-list-item-right\">"+reviews[i].createTime.substr(0,11)+" &nbsp;"+reviews[i].createTime.substr(11,19)+"</div>\n" +
+							"                        </div>\n" +
+							"                        <div class=\"aui-list-item-text\">\n" +
+							"                            "+'('+reviews[i].startDate.substr(6,11)+'/'+reviews[i].endDate.substr(6,11)+')&nbsp;'+(reviews[i].type==1?"事假":"病假")+"\n"+status+
+							"                        </div>\n" +
+							"                        <div class=\"aui-list-item-text\">\n" +
+							"                            "+reviews[i].content+"\n" +
+							"                        </div>\n" +
+							"                    </div>\n" +
+							"                </div>\n" +
+							"                <div class=\"swiper-slide slide-left\">\n" +
+							"                </div>\n" +
+							"                <div class=\"swiper-slide\"></div>\n" +
+							"                <div class=\"swiper-slide\"></div>\n" +
+							"                <div class=\"swiper-slide swipe-btn  aui-btn-warning\" onmouseover='changeStatus(\""+reviews[i].revieweId+"\",1)' tapmode onclick=\"openWin('notification')\">同意</div>\n" +
+							"                <div class=\"swiper-slide swipe-btn refuse \" id='"+i+"' onmouseover='changeStatus(\""+reviews[i].revieweId+"\",2)' tapmode >拒绝</div>\n" +
+							"            </div>\n" +
+							"            </li>";
+						
+						$api.append(reviewsDom, html);	
+					}
+					initSwiper();
+				}
+			});
+        }
+        
+        var maxbtn_num = 3; //列按钮最大数量
+        var openSwipers = [];//滑开的列
+        
+        /**
+         * @brief       初始化滑动
+         * @return          
+         */     
+        function initSwiper()
+        {
+            var sele = ".swiper-container"; 
+            var swiper = new Swiper(sele, {
+                slidesPerView: 4,
+                slidesPerGroup:  1,
+                onSlideChangeStart: function(swiper) {
+                    openSwipers.push(swiper);
+                }
+            });  
+        }
+        
+        //隐藏按钮
+        function hideButton(){
+        	openSwipers[0].slideTo(0, 300, false);
+			openSwipers.splice(0,0);
+        }
+        
+        
+        /**
+         * @brief       删除按钮监听事件
+         * @param[in]   el对象    obj 被点击的按钮对象
+         * @return          
+         */ 
+        function changeStatus(revieweId,status) {
+        	dialog.alert({
+                title:"操作提示",
+                msg:'确认操作？',
+                buttons:['取消','确定']
+            },function(ret){
+            
+            	if(ret.buttonIndex==2){
+            		
+            		$api.get(config.server1 + "/reviewe/changeStatus.do?reviewId=" + revieweId+"&status="+status+"", function(result) {
+						result = eval('(' + result + ')');
+						if(result.success){
+							api.toast({msg: "操作成功",duration: 2000});
+							loadData();
+						}else{
+							api.toast({msg: result.msg,duration: 2000});
+						}
+					});
+            		hideButton();
+            	}
+            });
+        }
+
+		function openWin(name) {
+			var delay = 0;
+			if(api.systemType != 'ios') {
+				delay = 300;
+			}
+			api.openWin({
+				name: '' + name + '',
+				url: '' + name + '_win.html',
+				bounces: false,
+				delay: delay,
+				slidBackEnabled: true,
+				vScrollBarEnabled: false
+			});
+		}
+
+</script>
+</html>

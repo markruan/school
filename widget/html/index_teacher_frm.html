@@ -1,0 +1,193 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>AUI快速完成布局</title>
+    <link rel="stylesheet" type="text/css" href="../css/aui.css" />
+    <style type="text/css">
+        #classify {
+            color: #ffffff !important;
+        }
+    </style>
+</head>
+<body>
+	
+   <section class="aui-content ">
+        <div class="aui-grid aui-bg-info">
+            <div class="aui-row" id="classify">
+                <div class="aui-col-xs-3" onclick="openWin('interaction')">
+				    <div class="aui-badge" id="notreadMsg" style="display: none;">
+							
+						</div>
+						<i class="aui-iconfont aui-icon-recovery"></i>
+						<div class="aui-grid-label">
+							未读消息
+						</div>
+                </div>
+                <div class="aui-col-xs-3" onclick="openWin('review')">
+            		<div class="aui-badge" id="notreviewMsg" style="display: none;">
+					</div>
+                    <i class="aui-iconfont aui-icon-camera"></i>
+                    <div class="aui-grid-label">审批</div>
+                </div>
+                <div class="aui-col-xs-3" onclick="openWin('announcement')">
+                    <i class="aui-iconfont aui-icon-pencil"></i>
+                    <div class="aui-grid-label">发布通知</div>
+                </div>
+                <div class="aui-col-xs-3"  onclick="openWin('homework')">
+                    <i class="aui-iconfont aui-icon-edit"></i>
+                    <div class="aui-grid-label">布置作业</div>
+                </div>
+            </div>
+        </div>
+    </section>
+     <section class="aui-content aui-margin-b-10">
+        <div class="aui-grid">
+            <div class="aui-row">
+                <div class="aui-col-xs-3" onclick="openWin('timetables')" >
+                    <i class="aui-iconfont aui-icon-date aui-text-success"></i>
+                    <div class="aui-grid-label">课表查询</div>
+                </div>
+                <div class="aui-col-xs-3" onclick="openWin('grades')">
+                    <i class="aui-iconfont aui-icon-calendar aui-text-danger"></i>
+                    <div class="aui-grid-label">成绩查询</div>
+                </div>
+                <div class="aui-col-xs-3" onclick="openWin('attendanceList')">
+                    <i class="aui-iconfont aui-icon-location aui-text-primary"></i>
+                    <div class="aui-grid-label">考勤查看</div>
+                </div>
+                <div class="aui-col-xs-3" onclick="openWin('payinfoList')">
+                    <i class="aui-iconfont aui-icon-cert aui-text-info"></i>
+                    <div class="aui-grid-label">消费查看</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--
+    <section class="aui-content aui-margin-b-10" style="overflow:hidden; background:#ffffff;">
+        <div class="aui-info aui-padded-l-15 aui-padded-r-15">
+            <div class="aui-info-item">
+                <img src="../image/liulangnan.png" class="aui-margin-r-10" style="width:2rem;border-radius:4px;" />
+                记录校园生活
+            </div>
+            <div class="aui-info-item">
+                <i class="aui-iconfont aui-icon-camera"></i>
+            </div>
+        </div>
+    </section>
+ <section class="aui-content  aui-margin-b-10">
+        <ul class="aui-list aui-collapse aui-border">
+            <div class="aui-collapse-item">
+                <li class="aui-list-item aui-collapse-header" tapmode>
+                    <div class="aui-list-item-inner aui-padded-t-10 aui-padded-b-10">
+                        <div class="aui-list-item-title">
+                             
+                <div class="aui-card-list-user-avatar">
+                    <img src="../image/demo1.png" class="aui-margin-r-10" style="width:2rem;border-radius:4px;" />
+                </div>
+                <div class="aui-card-list-user-name">
+                    <div>今日考勤</div>
+                </div>
+                <div class="aui-card-list-user-info">到校45人，迟到8人，旷课1人</div>
+                        </div>
+                        <div class="aui-list-item-right">
+                            <i class="aui-iconfont aui-icon-down aui-collapse-arrow"></i>
+                        </div>
+                    </div>
+                </li>
+                <div class="aui-collapse-content">
+                    <li class="aui-list-item" style="display: block;">
+                        <div class="aui-media-list-item-inner">
+                            <div class="aui-list-item-media">
+                                <img src="../image/demo1.png">
+                            </div>
+                            <div class="aui-list-item-inner aui-padded-t-10 aui-padded-b-10" style="display: block;">
+                                <div class="aui-list-item-text">
+                                    <div class="aui-list-item-title">赵老师布置家庭作业</div>
+                                    <div class="aui-list-item-right">完成截至时间：08:00</div>
+                                </div>
+                                <div class="aui-list-item-text">
+                                    <div class="aui-ellipsis-2">对这几天讲的知识点预习和复习，同事完成课本32页的习题</div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </div>
+            </div>
+        </ul>
+    </section>
+    -->
+  
+</body>
+<script type="text/javascript" src="../script/api.js" ></script>
+<script type="text/javascript" src="../script/aui-collapse.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+	    api.parseTapmode();
+	    listenNotread();
+    }
+    var collapse = new auiCollapse({
+        autoHide:false //是否自动隐藏已经展开的容器
+    });
+    
+    function openWin(name){
+        var delay = 0;
+        if(api.systemType != 'ios'){
+            delay = 300;
+        }
+        api.openWin({
+            name: ''+name+'',
+            url: ''+name+'_win.html',
+            bounces:false,
+            delay: delay,
+            slidBackEnabled:true,
+            vScrollBarEnabled:false
+        });
+    }
+    
+    
+    function listenNotread() {
+			var notreadMsg= $api.byId("notreadMsg");
+			setInterval(function(){
+				var notread=$api.getStorage("notread");
+				//获取最近联系的好友列表
+				var ids=Object.getOwnPropertyNames(notread.msg).length;
+				//监听是否有新消息
+				var totalCount=0;
+				var has=false;
+				if(ids>0){
+					//统计所有好友中的未读消息
+					for(var id in notread.msg){
+						if(notread.msg[id].count>0){
+							totalCount+=notread.msg[id].count;
+						}
+						
+					}
+					if(totalCount>0){
+						$api.html(notreadMsg, totalCount);
+						$api.css(notreadMsg,"display:block;");	
+						has=true;
+					}
+				}
+				
+				if(!has){
+					$api.css(notreadMsg,"display:none;");	
+				}
+				
+				//检测未读请假审批数量
+				var notreview=$api.getStorage("notreview");
+				if(notreview){
+					//显示未读数量
+					$api.html(notreviewMsg, notreview);
+					$api.css(notreviewMsg,"display:block;");	
+				}else{
+					//隐藏未读数
+					$api.css(notreviewMsg,"display:none;");	
+				}
+				
+			},1000);
+		}
+</script>
+</html>

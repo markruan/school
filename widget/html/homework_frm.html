@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>title</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css"/>
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+		<style>
+			body {
+			}
+		</style>
+	</head>
+	<body>
+	
+	<div class="aui-content aui-margin-b-15">
+        <ul class="aui-list aui-media-list" id="works">
+            
+        </ul>
+    </div>
+	<!--<div class="aui-content">
+			<ul class="aui-list aui-form-list">
+				<li class="aui-list-item" style="display:none">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label">
+							标题：
+						</div>
+						<div class="aui-list-item-input">
+							<input type="text" placeholder="填写作业标题" var id="title" value="work">
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label">
+							班级：
+						</div>
+						<div class="aui-list-item-input">
+							<select id="classes"></select>
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label">
+							科目：
+						</div>
+						<div class="aui-list-item-input">
+							<select id="subject"></select>
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label">
+							完成时间：
+						</div>
+						&nbsp;&nbsp;&nbsp;&nbsp;
+						<div class="aui-list-item-input">
+							<input type="date" id="endDate" value="2014-07-12">
+						</div>
+					</div>
+				</li>
+				
+			</ul>
+			
+		</div>-->
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript" src="../script/config.js"></script>
+	<script type="text/javascript" src="../script/aui-toast.js"></script>
+	<script type="text/javascript">
+		var user=$api.getStorage("user");
+		var toast = new auiToast();
+	apiready=function(){
+		
+	
+		loadData();
+	}
+	
+	function loadData(){
+        	$api.get(config.server1+"/work/list.do?userId="+user.userId, function(result) {
+				result = eval('(' + result + ')');
+				if(result.success){
+					var works=result.result;
+					for(var i=0;i<works.length;i++){
+						var recordHtml='';
+						var index=works[i].content.indexOf('#record:');
+						if(index>-1){
+							var recordId=works[i].content.substr(index+8,32);
+							recordHtml+='<div onclick="play(\''+recordId+'\')" class="aui-btn aui-btn-warning">播放录音</div>';
+							works[i].content=works[i].content.substring(0,index);
+						}
+					
+						var html=" <li class=\"aui-list-item\">\n" +
+							"                <div class=\"aui-media-list-item-inner\">\n" +
+//							"                    <div class=\"aui-list-item-media\">\n" +
+//							"                        <img src=\"../image/demo3.png\" class=\"aui-img-round\">\n" +
+//							"                    </div>\n" +
+							"                    <div class=\"aui-list-item-inner\">\n" +
+							"                        <div class=\"aui-list-item-text\">\n" +
+							"                            <div class=\"aui-list-item-title\">"+works[i].subject+"</div>\n" +
+							"                            <div class=\"aui-list-item-right\">"+works[i].createTime.substr(0,11)+" &nbsp;"+works[i].createTime.substr(11,19)+"</div>\n" +
+							"                        </div>\n" +
+							
+							
+							"                        <div class=\"aui-list-item-text\">\n" +
+							"                            "+works[i].content+"\n" +
+							"                        </div>\n" +
+													recordHtml+
+							"                        <div class=\"aui-list-item-text\">\n" +
+							"                            <div class=\"aui-list-item-title\">&nbsp;</div>\n" +
+							"                        <div class=\"aui-list-item-right\"><font color='red'>结束时间</font>："+works[i].endDate+"</div>\n" +
+							"                        </div>\n" +
+							"                    </div>\n" +
+							"                </div>\n" +
+							"            </li>";
+					
+						$api.append($api.byId('works'),html);
+					}
+				}
+		});
+        	
+     }
+     
+     //播放录音方法
+     function play(recordId){
+     	//下载前清空文件
+     	api.writeFile({path: 'fs://homeworkRecord.amr',data: ''}, function(ret, err) {});
+     	
+     	toast.loading({
+				title : "加载中",
+				duration : 2000
+			}, function(ret) {
+			
+				api.download({
+				    url: config.fileUrl+'/'+recordId,
+				    savePath: 'fs://homeworkRecord.amr',
+				    report: true,
+				    cache: false,
+				    allowResume: true
+				}, function(ret, err) {
+				    if (ret.state == 1) {
+				        //下载成功,播放文件
+		           		api.startPlay({ path: 'fs://homeworkRecord.amr'}, function(ret, err) {});
+				    } 
+				    
+				    toast.hide();
+				    
+				});
+				
+			});
+     
+     	
+     }
+	
+	function openWin(name){
+        var delay = 0;
+        if(api.systemType != 'ios'){
+            delay = 300;
+        }
+        api.openWin({
+            name: ''+name+'',
+            url: ''+name+'_win.html',
+            bounces:false,
+            delay: delay,
+            slidBackEnabled:true,
+            vScrollBarEnabled:false
+        });
+    }
+		function loadClasses() {
+			var url = config.server1 + "/teacherAndClassesAndSubjects/findClaseesByUserId.do?userId=" + user.userId;
+			var classesDom = $api.byId("classes");
+			$api.get(url, function(result) {
+				result = eval('(' + result + ')');
+				if (result.success && result.result) {
+					var classes = result.result;
+					for (var classesId in classes) {
+						var html = '<option value="' + classesId + '">' + classes[classesId] + '</option>';
+						$api.append(classesDom, html);
+					}
+					loadSubject($api.byId("classes").value);
+				}
+			});
+		}
+
+		function loadSubject(classesId) {
+			var url = config.server1 + "/teacherAndClassesAndSubjects/findSubjectsByUserIdAndClassesId.do?userId=" + user.userId + '&classesId=' + classesId;
+			var subjectDom = $api.byId("subject");
+			subjectDom.innerHTML = '';
+			$api.get(url, function(result) {
+				result = eval('(' + result + ')');
+				if (result.success && result.result) {
+					var subjects = result.result;
+					for (var subjectId in subjects) {
+						var html = '<option value="' + subjects[subjectId] + '">' + subjects[subjectId] + '</option>';
+						$api.append(subjectDom, html);
+					}
+				}
+			});
+		}
+
+		function submit(content) {
+		
+			var title = $api.byId("title").value;
+			var subject = $api.byId("subject").value;
+			var endDate = $api.byId("endDate").value;
+			
+			var classes = $api.byId("classes").value;
+			if (title.length == 0) {
+				api.toast({
+					msg : "请输入标题",
+					duration : 1000
+				});
+				return;
+			}
+			if (content.length == 0) {
+				api.toast({
+					msg : "请输入作业内容",
+					duration : 1000
+				});
+				return;
+			}
+			toast.loading({
+				title : "加载中",
+				duration : 2000
+			}, function(ret) {
+				var url = config.server1 + "/work/addWork.do?";
+				url += "title=" + title;
+				url += "&subject=" + subject;
+				url += "&endDate=" + endDate;
+				url += "&content=" + content;
+				url += "&classes=" + classes;
+				
+				
+				
+				api.ajax({
+					url : url,
+					method : 'post',
+					data : {
+						files : {
+							file : recordPath
+						},
+						values : {
+							
+						}
+					}
+				}, function(ret, err) {
+					if (ret) {
+						if (ret.success) {
+							api.toast({
+								msg : "操作成功",
+								duration : 2000
+							});
+						} else {
+							api.toast({
+								msg : result.msg,
+								duration : 2000
+							});
+						}
+						toast.hide();
+					} else {
+						api.alert("网络连接失败");
+					}
+					
+			        //清空录音文件
+			        api.writeFile({path: recordPath,data: ''}, function(ret, err) {});
+			        recordPath=null;
+				});
+			});
+		}
+		
+		
+		  
+		  function loadBox(){
+		  	//聊天
+			UIChatBox = api.require('UIChatBox');
+			UIChatBox.open({
+				placeholder : '',
+				maxRows : 4,
+				emotionPath : 'widget://res/img/emotion',
+				texts : {
+					recordBtn : {
+						normalTitle : '按住说话',
+						activeTitle : '松开结束'
+					},
+					sendBtn : {
+						title : '提交'
+					}
+				},
+				styles : {
+					inputBar : {
+						borderColor : '#d9d9d9',
+						bgColor : '#f2f2f2'
+					},
+					inputBox : {
+						borderColor : '#B3B3B3',
+						bgColor : '#FFFFFF'
+					},
+					emotionBtn : {
+						normalImg : 'widget://res/img/chatBox_face1.png'
+					},
+					keyboardBtn : {
+						normalImg : 'widget://res/img/chatBox_key1.png'
+					},
+					speechBtn : {
+						normalImg : 'widget://res/img/record.png'
+					},
+					recordBtn : {
+						normalBg : '#c4c4c4',
+						activeBg : '#999999',
+						color : '#000',
+						size : 14
+					},
+					indicator : {
+						target : 'both',
+						color : '#c4c4c4',
+						activeColor : '#9e9e9e'
+					},
+					sendBtn : {
+						titleColor : '#FFFFFF',
+						bg : '#03a9f4',
+						activeBg : '#46a91e',
+						titleSize : 14
+					}
+				}
+			}, function(ret, err) {
+				if (ret) {
+					if (ret.eventType == 'send') {
+						var content=ret.msg;
+						//提交录音文件与数据
+						submit(content);
+					}
+				} else {
+					alert(JSON.stringify(err));
+				}
+			});
+			
+			UIChatBox.setPlaceholder({
+			    placeholder: '请在此处填内容'
+			});
+			listenPress();
+			listenPressCancel();
+		  }
+		  
+		  //按下录音键
+		function listenPress() {
+			//监听录音
+			UIChatBox.addEventListener({
+				target : 'recordBtn',
+				name : 'press'
+			}, function(ret, err) {
+				api.startRecord({
+					path : 'fs://homeworkRecord.amr'
+				});
+			});
+		}
+		
+		//松开录音键
+		function listenPressCancel() {
+			UIChatBox.addEventListener({
+				target : 'recordBtn',
+				name : 'press_cancel'
+			}, function(ret, err) {
+				api.stopRecord(function(ret, err) {
+					if (ret) {
+						recordPath = ret.path;
+					}
+				});
+			});
+		}
+		
+	</script>
+</html>

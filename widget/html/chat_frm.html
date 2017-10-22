@@ -1,0 +1,265 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>AUI快速完成布局</title>
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+	</head>
+	<body>
+		<section class="aui-chat" id="content">
+			
+		</section>
+	</body>
+	<script type="text/javascript" src="../script/api.js" ></script>
+	<script type="text/javascript" src="../script/config.js"></script>
+	<script type="text/javascript" src="../script/aui-toast.js"></script>
+	<script type="text/javascript">
+		var height = 1000;
+		var chatWithName=$api.getStorage('chatWithName');
+		// 当前聊天对象
+		var chatwith = $api.getStorage("chatWith");
+		// 自己的信息
+		var user = $api.getStorage("user");
+		var toast = new auiToast();
+	  
+	  var sourcePath = "widget://res/img/emotion";//表情存放目录
+    var emotionData;//存储表情
+
+		apiready = function() {
+			// 获取历史消息记录5条
+			getHistoryMsg();
+			
+        getImgsPaths(sourcePath, function (emotion) {
+                emotionData = emotion;
+        })	
+
+
+			// 查看是否有自己发送的消息，如果有则显示
+			setInterval(function() {
+				
+				if($api.getStorage("tmpMsg")){
+					sendMsg(user.userName, transText($api.getStorage("tmpMsg")));
+					scrollToBottom();
+					$api.setStorage("tmpMsg",null);
+				}
+			}, 500);
+			
+		
+			// 接受新消息
+			setInterval(function() {
+				$api.get(config.server1 + '/notification/getNotification.do?targetUserNo='+user.userNo, function(result) {
+					result = eval('(' + result + ')');
+					if (result.success) {
+						var notis = result.result;
+						if (notis) {
+							for (var i = 0; i < notis.length; i++) {
+								if (notis[i].url.indexOf('chat_win.html') > -1 && notis[i].url.indexOf(chatwith)){
+									getMsg(chatWithName, transText(notis[i].content));
+									scrollToBottom();
+								}else{
+								api.notification({
+									notify : {
+										title : notis[i].title,
+										content : notis[i].content,
+										extra : notis[i].url
+									}
+								}, function(ret, err) {
+									
+								});
+								}
+							}
+						}
+					}
+				});
+			}, config.notiInterval);
+		}
+		
+		// 滚动到底部
+		function scrollToBottom() {
+			if (document.scroHeight) {
+				window.scrollTo(0, document.scroHeight += 1000);
+			} else {
+				window.scrollTo(0, document.scroHeight = 5000);
+			}
+		}
+		
+		
+		
+		//显示当前聊天对象发送的消息
+		function getMsg(targetUserNo, content) {
+			var html='';
+			if(content.indexOf('#record:')>-1){
+				//收到语音消息
+				
+				
+				
+				html = "<div class=\"aui-chat-item aui-chat-left\">\n" + 
+				"					<div class=\"aui-chat-media\">\n" 
+				+ "						<img src=\"../image/demo2.png\" />\n" + 
+				"					</div>\n" + "					<div class=\"aui-chat-inner\">\n" 
+				+ "						<div class=\"aui-chat-name\">\n" + 
+				"							" + targetUserNo + 
+				" <span class=\"aui-label aui-label-warning\">家长</span>\n" + 
+				"						</div>\n" + "						<div class=\"aui-chat-content\">\n" 
+				+ "							<div class=\"aui-chat-arrow\"></div>\n" +
+				 "						<img onclick='play(\""+content.substr(8)+"\")' height='30px' src='"+config.server1+"/images/sendRecord.png'>\n" + 
+				 "						</div>\n" + 
+				 "						<div class=\"aui-chat-status aui-chat-status-refresh\">\n" + 
+				 "							\n" 
+				 + "						</div>\n" + "					</div>\n" + "				</div>";
+				
+			}else{
+				html = "<div class=\"aui-chat-item aui-chat-left\">\n" + 
+				"					<div class=\"aui-chat-media\">\n" 
+				+ "						<img src=\"../image/demo2.png\" />\n" + 
+				"					</div>\n" + "					<div class=\"aui-chat-inner\">\n" 
+				+ "						<div class=\"aui-chat-name\">\n" + 
+				"							" + targetUserNo + 
+				" <span class=\"aui-label aui-label-warning\">家长</span>\n" + 
+				"						</div>\n" + "						<div class=\"aui-chat-content\">\n" 
+				+ "							<div class=\"aui-chat-arrow\"></div>\n" +
+				 "							" + content + "\n" + 
+				 "						</div>\n" + 
+				 "						<div class=\"aui-chat-status aui-chat-status-refresh\">\n" + 
+				 "							\n" 
+				 + "						</div>\n" + "					</div>\n" + "				</div>";
+			}
+		
+			
+			$api.append($api.byId('content'), html);
+			
+		}
+		
+		//显示自己发送的消息
+		function sendMsg(sendUserNo, content) {
+			if(content.indexOf('#record:')>-1){
+				var html = "<div class=\"aui-chat-item aui-chat-right\">\n" + 
+				"            <div class=\"aui-chat-media\">\n" + 
+				"                <img src=\"../image/liulangnan.png\" />\n" + 
+				"            </div>	\n" + "            <div class=\"aui-chat-inner\">\n" + 
+				"                <div class=\"aui-chat-name\">" + sendUserNo + "</div>\n" + 
+				"                <div class=\"aui-chat-content\">\n" + 
+				"                    <div class=\"aui-chat-arrow\"></div>\n<img onclick='play(\""+content.substr(8)+"\")' height='30px' src='"+config.server1+"/images/getRecord.png'>"+ 
+				"                </div>\n" + "                <div class=\"aui-chat-status\">\n" + 
+				"                    \n" + 
+				"                </div>\n" + "            </div>\n" + "        </div>";
+			
+			}else{
+				var html = "<div class=\"aui-chat-item aui-chat-right\">\n" + 
+				"            <div class=\"aui-chat-media\">\n" + 
+				"                <img src=\"../image/liulangnan.png\" />\n" + 
+				"            </div>	\n" + "            <div class=\"aui-chat-inner\">\n" + 
+				"                <div class=\"aui-chat-name\">" + sendUserNo + "</div>\n" + 
+				"                <div class=\"aui-chat-content\">\n" + 
+				"                    <div class=\"aui-chat-arrow\"></div>\n" + content + 
+				"                </div>\n" + "                <div class=\"aui-chat-status\">\n" + 
+				"                    \n" + 
+				"                </div>\n" + "            </div>\n" + "        </div>";
+				
+			}
+			$api.append($api.byId('content'), html);
+			
+		}
+ 				/*将文字中的表情符号翻译成图片，并可自定义图片尺寸*/
+                function transText(text, imgWidth, imgHeight){
+                        var imgWidth = imgWidth || 30;
+                        var imgHeight = imgHeight || 30;
+                        var regx = /\[(.*?)\]/gm;
+                        var textTransed = text.replace(regx,function(match){
+                                var imgSrc = emotionData[match];
+                                if(!imgSrc){
+                                        //说明不对应任何表情，直接返回
+                                        return match;
+                                }
+                                var img = "<img src="+imgSrc+" width="+imgWidth+" height="+imgHeight+">";
+                                return img;
+                        });
+                        return textTransed;
+                }
+//表情配置信息
+function getImgsPaths(sourcePathOfChatBox, callback){
+        var jsonPath = sourcePathOfChatBox + "/emotion.json";//表情的JSON数组
+        api.readFile({
+                path: jsonPath
+        },function(ret,err){
+                if(ret.status){
+                        var emotionArray = JSON.parse(ret.data);
+                        var emotion = {};
+                        for(var idx in emotionArray){
+                                var emotionItem = emotionArray[idx];
+                                var emotionText = emotionItem["text"];
+                                var emotionUrl = "../res/img/emotion/"+emotionItem["name"]+".png";
+                                emotion[emotionText] = emotionUrl;
+                        }
+                        /*把emotion对象 回调出去*/
+                        if("function" === typeof(callback)){
+                                callback(emotion);
+                        }
+                }
+        });
+}
+
+
+
+
+
+
+		//显示5条消息历史记录
+		function getHistoryMsg() {
+			var user = $api.getStorage("user");
+			$api.get(config.server1 + '/msg/getLastMsg.do?sendUserNo=' + user.userNo + "&targetUserNo="+chatwith, function(result) {
+				result = eval('(' + result + ')');
+				if (result.success) {	
+					for (var i = result.result.length - 1; i >= 0; i--) {
+						if (result.result[i].targetUserNo == user.userNo) {
+							//收到信息
+							getMsg(chatWithName, transText(result.result[i].content));
+							scrollToBottom();
+						} else {
+							//发送
+							sendMsg(user.userName, transText(result.result[i].content));
+							scrollToBottom();
+						}
+					}
+				}
+			});
+		}
+		
+		
+		function play(recordId){
+
+     	//下载前清空文件
+     	api.writeFile({path: 'fs://record.amr',data: ''}, function(ret, err) {});
+     	
+     	toast.loading({
+				title : "加载中",
+				duration : 2000
+			}, function(ret) {
+			
+				api.download({
+				    url: config.fileUrl+'/'+recordId,
+				    savePath: 'fs://record.amr',
+				    report: true,
+				    cache: false,
+				    allowResume: true
+				}, function(ret, err) {
+				    if (ret.state == 1) {
+				        //下载成功,播放文件
+		           		api.startPlay({ path: 'fs://record.amr'}, function(ret, err) {});
+				    } 
+				    
+				    toast.hide();
+				    
+				});
+				
+			});
+     
+     	
+     }
+		
+		
+	</script>
+	<div id="test1"></div>
+</html>

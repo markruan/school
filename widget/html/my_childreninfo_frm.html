@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>title</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css" />
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+
+	</head>
+
+	<body>
+		<div class="aui-content aui-margin-b-15">
+			<ul class="aui-list aui-form-list">
+				<li class="aui-list-header">学校/班级信息</li>
+				<li class="aui-list-item aui-list-item-middle">
+					<div class="aui-list-item-inner aui-list-item-arrow" id="school">
+					</div>
+				</li>
+				<li class="aui-list-item aui-list-item-middle">
+					<div class="aui-list-item-inner aui-list-item-arrow" id="class">
+						初二一班
+					</div>
+				</li>
+			</ul>
+		</div>
+
+		<div class="aui-content aui-margin-b-15">
+			<ul class="aui-list aui-form-list" id="students">
+				<li class="aui-list-header">孩子姓名</li>
+				<!-- <li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label">
+							姓名：
+						</div>
+						<div class="aui-list-item-input">
+							<input type="text" placeholder="输入孩子姓名">
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label">
+							出生日期
+						</div>
+						<div class="aui-list-item-input">
+							<input type="text" readonly="readonly" value="2001-02-12">
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label">
+							特别嘱咐
+						</div>
+						<div class="aui-list-item-input">
+							<textarea placeholder="请输入需要特别注意的地方，如病史等"></textarea>
+						</div>
+						<div class="aui-list-item-label-icon">
+							<i class="aui-iconfont aui-icon-display"></i>
+						</div>
+					</div>
+				</li> 
+
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner aui-list-item-center aui-list-item-btn">
+						<div class="aui-btn aui-btn-info aui-margin-r-5">保存</div>
+					</div>
+				</li>
+				
+				-->
+
+			</ul>
+
+		</div>
+
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript" src="../script/config.js"></script>
+	<script> 
+	
+		apiready=function(){
+			loadData();
+		} 
+	
+		var user = $api.getStorage("user");
+		
+		function loadData(){
+		
+			$api.get(config.server1 + "/child/getChildInfo.do?parentId="+user.userId, function(result) {
+				result = eval('(' + result + ')');
+				
+				if(result.success){
+					$api.html($api.byId("school"),result.result.school);
+					$api.html($api.byId("class"),result.result["class"]);
+					
+					var students=result.result.students;
+					var studentsDom=$api.byId('students');
+					
+					for(var i=0;i<students.length;i++){
+						var html="<li class=\"aui-list-item\">\n" +
+						"					<div class=\"aui-list-item-inner\">\n" +
+						"						<div class=\"aui-list-item-label\">\n" +
+						"							姓名：\n" +
+						"						</div>\n" +
+						"						<div class=\"aui-list-item-input\">\n" +
+						"							<input type=\"text\" value='"+students[i].stuName+"' placeholder=\"输入孩子姓名\">\n" +
+						"						</div>\n" +
+						"					</div>\n" +
+						"				</li>\n" +
+						"       <li class=\"aui-list-item\">\n" +
+						"					<div class=\"aui-list-item-inner\">\n" +
+						"						<div class=\"aui-list-item-label\">\n" +
+						"							卡号：\n" +
+						"						</div>\n" +
+						"						<div class=\"aui-list-item-input\">\n" +
+						"							<input type=\"text\" value='"+students[i].cardNo+"' placeholder=\"输入孩子卡号\">\n" +
+						"						</div>\n" +
+						"					</div>\n" +
+						"				</li>\n" ;
+						
+						$api.append(studentsDom, html);
+						
+					}
+
+				}
+				
+			});	
+		
+		}
+	
+	
+    function openWin(name){
+        var delay = 0;
+        if(api.systemType != 'ios'){
+            delay = 300;
+        }
+        api.openWin({
+            name: ''+name+'',
+            url: ''+name+'_win.html',
+            bounces:false,
+            delay: delay,
+            slidBackEnabled:true,
+            vScrollBarEnabled:false
+        });
+    }
+</script>
+
+</html>

@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.css" />
+</head>
+<body>
+    <section class="aui-content">
+        <div class="aui-timeline">
+            <div class="aui-timeline-item-header">2017年1月8日</div>
+            <div class="aui-timeline-item">
+                <div class="aui-timeline-item-label aui-bg-info text-light">6点10分</div>
+                <div class="aui-timeline-item-inner">
+                    <div class="aui-card-list">
+                        <div class="aui-card-list-header aui-border-b">
+                            <div>消费2元</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="aui-timeline-item">
+                <div class="aui-timeline-item-label aui-bg-warning text-light">17点25分</div>
+                <div class="aui-timeline-item-inner">
+                    <div class="aui-card-list">
+                        <div class="aui-card-list-header aui-border-b">
+                            <div>消费12元</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+ <div class="aui-timeline-item-header">2017年1月7日</div>
+            <div class="aui-timeline-item">
+                <div class="aui-timeline-item-label aui-bg-info text-light">13点10分</div>
+                <div class="aui-timeline-item-inner">
+                    <div class="aui-card-list">
+                        <div class="aui-card-list-header aui-border-b">
+                            <div>消费18元</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="aui-timeline-item">
+                <div class="aui-timeline-item-label aui-bg-warning text-light">12点25分</div>
+                <div class="aui-timeline-item-inner">
+                    <div class="aui-card-list">
+                        <div class="aui-card-list-header aui-border-b">
+                            <div>消费2元</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-collapse.js"></script>
+    <script>
+        apiready = function () {
+    api.parseTapmode();
+    }
+                var collapse = new auiCollapse({
+                autoHide:false //是否自动隐藏已经展开的容器
+            });
+		function openWin(name) {
+			var delay = 0;
+			if(api.systemType != 'ios') {
+				delay = 300;
+			}
+
+			api.openWin({
+				name: '' + name + '',
+				url: '' + name + '_win.html',
+				bounces: false,
+				delay: delay,
+				slidBackEnabled: true,
+				vScrollBarEnabled: false
+			});
+		}
+
+</script>
+</html>

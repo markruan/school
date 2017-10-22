@@ -1,0 +1,187 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+	</head>
+	<body>
+		<header class="aui-bar aui-bar-nav" id="aui-header">
+			<a class="aui-btn aui-pull-left" tapmode onclick="closeWin()"> <span class="aui-iconfont aui-icon-left"></span> </a>
+			<div class="aui-title">
+				上传头像
+			</div>
+		</header>
+		<footer id="foot">
+			<div class="aui-bar aui-bar-tab aui-margin-t-15 aui-margin-b-15">
+			<ul class="aui-list aui-form-list">
+				<li class="aui-list-item">
+	                <div class="aui-list-item-inner aui-list-item-center aui-list-item-btn">
+	                    <div class="aui-btn aui-btn-info aui-margin-r-5" onclick="savePhoto()">保存</div>
+	                    <div class="aui-btn aui-btn-danger aui-margin-l-5" onclick="closeWin()">取消</div>
+	                </div>
+	            </li>
+	        </ul>
+			</div>
+			
+		</footer>
+		
+		<form id="form" enctype="multipart/form-data" style="display: none;">
+			
+			<input type="button" id="submit" />
+		</form>
+		
+		
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript" src="../script/config.js"></script>
+	<script type="text/javascript" src="../script/aui-dialog.js"></script>
+	<script type="text/javascript">
+		var user=$api.getStorage("user");
+		var dialog = new auiDialog({});
+	
+		function savePhoto(){
+			
+			FNImageClip.save({
+			    destPath: 'fs://imageClip/result.png',
+			    copyToAlbum: false,
+			    quality: 1
+			}, function(ret, err) {
+			    if (ret) {
+			    document.getElementsByClassName('aui-btn')[0].onclick='';
+          document.getElementsByClassName('aui-btn')[0].innerHTML='正在提交...';
+			    	
+				      //文件上传不要使用toast提示进度，建议将提交按钮改为正在提交。。。。
+				      api.ajax({
+							    url: config.server1+'/sysuser/uploadPhoto.do',
+							    method: 'post',
+							    data: {
+							        files: {
+							            file: ret.destPath
+							        },
+							        values:{userId:user.userId}
+							    }
+							}, function(ret, err) {
+							    if (ret) {
+							    	if(ret.success){
+							    		alert('上传成功');
+							    		document.getElementsByClassName('aui-btn')[0].innerHTML='保存成功';
+							    	}else{
+							    		alert(ret.msg);
+							    	}
+							        
+							    } else {
+							        api.alert("网络连接失败");
+							    }
+							 
+							    FNImageClip.close();
+					    		closeWin();
+							}); 
+					       
+			    }else{
+			    	FNImageClip.close();
+		    		closeWin();
+			    } 
+			   	    
+			});
+			
+		}
+	
+		apiready = function() {
+			//默认隐藏按钮
+			$api.css($api.byId('foot'),'display:none;');
+			
+			 dialog.alert({
+                        title:"操作提示",
+                        msg:'请选择图片来源',
+                        buttons:['取消','图库','相机']
+                    },function(ret){
+                        if(ret){
+                                              	
+                        	var sourceType;
+                        	switch(ret.buttonIndex){
+                        		case 1:
+                        			closeWin();
+                        			break;
+                        		case 2:
+                        			//从图片库获取
+									sourceType='library';
+                        			break;
+                        		case 3:
+                        			//从相机选择
+                        			sourceType='camera';
+
+                        			break;	
+                        	}
+                        	
+                        	if(sourceType){
+                        		
+                        		api.getPicture({
+									sourceType : sourceType,
+									//encodingType : 'jpg',
+									mediaValue : 'pic',
+									destinationType : 'url',
+									allowEdit : true,
+									quality : 100,
+									
+									saveToPhotoAlbum : false
+								}, function(ret, err) {
+									if (ret&&ret.data) {
+										composeImg(ret.data);
+									}else{
+										closeWin();
+									} 
+								});
+                        	}
+                            
+                        }
+                                                
+                    });
+		};
+		
+		//裁剪图片
+		function composeImg(imgPath){
+			var header = $api.byId('aui-header');
+			$api.fixStatusBar(header);
+			var headerPos = $api.offset(header);
+			var body_h = $api.offset($api.dom('body')).h;
+			var footer_h = $api.offset($api.dom('footer')).h;
+		
+			FNImageClip = api.require('FNImageClip');
+			FNImageClip.open({
+				rect : {
+					x : 0,
+				y : headerPos.h,
+				w : 'auto',
+				h : api.winHeight - headerPos.h - footer_h-100
+				},
+				srcPath : imgPath,
+				style : {
+					mask : '#888',
+					clip : {
+						w : 200,
+						h : 200,
+						x : 90,
+						y : 150,
+						borderColor : '#0f0',
+						borderWidth : 1,
+						appearance : 'rectangle'
+					}
+				},
+				fixedOn : api.frameName
+			}, function(ret, err) {
+				
+				$api.css($api.byId('foot'),'display:block;');
+				
+			});
+		
+		}
+		
+		
+		function closeWin() {
+			api.closeWin({
+			});
+		}
+	</script>
+</html>

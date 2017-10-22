@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.css" />
+            <style>
+            /* 三格图 */
+            
+            .half-floor-floor {
+                background: #fff;
+                margin: 10px 0px 10px 0px;
+                box-shadow: 0 1px 1px #dcdcdc;
+                overflow: hidden;
+            }
+            
+            .half-floor {
+                width: 50%;
+                border-width: 0 1px 0 0;
+                float: left;
+                margin-left: -1px;
+                border-right: 1px solid #dadada;
+            }
+            
+            .brand-up-floor,
+            .down-floor,
+            .up-floor {
+                width: 50%;
+                float: right;
+            }
+            .up-floor {
+                margin-top: -1px;
+                border-bottom: 1px solid #dadada;
+                border-width: 0 0 1px;
+            }
+        </style>
+</head>
+<body>
+	<div class="aui-content aui-margin-b-15">
+        <ul class="aui-list aui-media-list" id="works">
+            
+        </ul>
+    </div>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+
+	<script type="text/javascript" src="../script/config.js"></script>
+	<script type="text/javascript" src="../script/aui-toast.js"></script>
+	<script type="text/javascript">
+		var user=$api.getStorage("user");
+		var toast = new auiToast();
+        apiready = function() {
+            loadData();
+        };
+        
+        function loadData(){
+        	$api.get(config.server1+"/work/list.do?userId="+user.userId, function(result) {
+				result = eval('(' + result + ')');
+				if(result.success){
+					var works=result.result;
+					for(var i=0;i<works.length;i++){
+						var recordHtml='';
+						var index=works[i].content.indexOf('#record:');
+						if(index>-1){
+							var recordId=works[i].content.substr(index+8,32);
+							recordHtml+='<div onclick="play(\''+recordId+'\')" class="aui-btn aui-btn-warning">播放录音</div>';
+							works[i].content=works[i].content.substring(0,index);
+						}
+					
+						var html=" <li class=\"aui-list-item\">\n" +
+							"                <div class=\"aui-media-list-item-inner\">\n" +
+//							"                    <div class=\"aui-list-item-media\">\n" +
+//							"                        <img src=\"../image/demo3.png\" class=\"aui-img-round\">\n" +
+//							"                    </div>\n" +
+							"                    <div class=\"aui-list-item-inner\">\n" +
+							"                        <div class=\"aui-list-item-text\">\n" +
+							"                            <div class=\"aui-list-item-title\">"+works[i].subject+"</div>\n" +
+							"                            <div class=\"aui-list-item-right\">"+works[i].createTime.substr(0,11)+" &nbsp;"+works[i].createTime.substr(11,19)+"</div>\n" +
+							"                        </div>\n" +
+							
+							
+							"                        <div class=\"aui-list-item-text\">\n" +
+							"                            "+works[i].content+"\n" +
+							"                        </div>\n" +
+													recordHtml+
+							"                        <div class=\"aui-list-item-text\">\n" +
+							"                            <div class=\"aui-list-item-title\">&nbsp;</div>\n" +
+							"                        <div class=\"aui-list-item-right\"><font color='red'>结束时间</font>："+works[i].endDate+"</div>\n" +
+							"                        </div>\n" +
+							"                    </div>\n" +
+							"                </div>\n" +
+							"            </li>";
+					
+						$api.append($api.byId('works'),html);
+					}
+				}
+		});
+        	
+     }
+     
+     function play(recordId){
+     	//下载前清空文件
+     	api.writeFile({path: 'fs://homeworkRecord.amr',data: ''}, function(ret, err) {});
+     	
+     	toast.loading({
+				title : "加载中",
+				duration : 2000
+			}, function(ret) {
+			
+				api.download({
+				    url: config.fileUrl+'/'+recordId,
+				    savePath: 'fs://homeworkRecord.amr',
+				    report: true,
+				    cache: false,
+				    allowResume: true
+				}, function(ret, err) {
+				    if (ret.state == 1) {
+				        //下载成功,播放文件
+		           		api.startPlay({ path: 'fs://homeworkRecord.amr'}, function(ret, err) {});
+				    } 
+				    
+				    toast.hide();
+				    
+				});
+				
+			});
+     
+     	
+     }
+        
+        
+        function openWin(name){
+        var delay = 0;
+        if(api.systemType != 'ios'){
+            delay = 300;
+        }
+        api.openWin({
+            name: ''+name+'',
+            url: ''+name+'_win.html',
+            bounces:false,
+            delay: delay,
+            slidBackEnabled:true,
+            vScrollBarEnabled:false
+        });
+    }
+    
+</script>
+</html>

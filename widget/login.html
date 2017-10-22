@@ -1,0 +1,189 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>AUI快速完成布局</title>
+		<link rel="stylesheet" type="text/css" href="./css/aui.css" />
+	</head>
+	<body>
+		<header class="aui-bar aui-bar-nav" id="aui-header">
+			<br />
+			<a class="aui-btn aui-pull-left"> </a>
+			<div class="aui-title" id="title">
+				飞天E校通
+			</div>
+			<br />
+			<br />
+		</header>
+		<div class="aui-content aui-margin-b-15">
+			<ul class="aui-list aui-form-list">
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label-icon">
+							<i class="aui-iconfont aui-icon-mobile"></i>
+						</div>
+						<div class="aui-list-item-input">
+							<input id="phoneNum"  type="text">
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label-icon">
+							<i class="aui-iconfont aui-icon-lock"></i>
+						</div>
+						<div class="aui-list-item-input">
+							<input id="userPass"  type="password">
+						</div>
+						<div class="aui-list-item-label-icon">
+							<i class="aui-iconfont aui-icon-display"></i>
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label-icon">
+							<i class="aui-iconfont aui-icon-my"></i>
+						</div>
+						<div class="aui-list-item-input">
+							<select id="userType">
+								<option value="0" id="parent"></option>
+								<option value="1" id="teacher"></option>
+							</select>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div id="loginBtn" class="aui-btn aui-btn-primary aui-btn-block " onclick="login()"></div>
+	</body>
+	<script type="text/javascript" src="./script/api.js"></script>
+	<script type="text/javascript" src="./script/aui-toast.js"></script>
+	<script type="text/javascript" src="./script/config.js"></script>
+	<script type="text/javascript">
+		var toast = new auiToast();
+		var delay = 0;
+		/**
+		 * 登录
+		 */
+		function login() {
+			toast.loading({
+				title : "加载中",
+				duration : 2000
+			}, function(ret) {
+				var userType = $api.byId('userType').value;
+				var userName = $api.byId('phoneNum').value;
+				var userPass = $api.byId('userPass').value;
+				
+				$api.get(config.server + "/appserver/login.do?userType=" + userType + "&userName=" + userName + "&userPass=" + userPass, function(result) {
+					result = eval('(' + result + ')');
+					/**
+					 * 返回的result会有三个属性
+					 * success代表操作是否成功
+					 * msg提示消息
+					 * result结果集
+					 */
+					if (result.success) {
+						//用户配置初始化
+						var url = config.server1 + "/userConfig/init.do?userId="+result.result.userId;
+						api.ajax({url : url,method : 'post',data : {files : {},values : {}}}, function(ret, err) {});
+					
+						openWinByUser(result.result);
+						$api.setStorage("user", result.result);
+						
+					} else {
+						alert(result.msg);
+					}
+					toast.hide();
+				});
+			});
+		}
+
+		function openWinByUser(user) {
+			var url = '';
+			switch(user.userType) {
+				case 1:
+					//教师登陆成功
+					url = './html/index_teacher_win.html';
+					break;
+				case 0:
+					//家长登陆成功
+					url = './html/index_win.html';
+					break;
+			}
+			api.openWin({
+				name : '飞天E校通',
+				url : url,
+				bounces : false,
+				delay : delay,
+				slidBackEnabled : true,
+				vScrollBarEnabled : false
+			});
+			var notRead = $api.getStorage("notread");
+			if (!notRead) {
+				//初始化未读消息
+				notread = {
+					"msg" : {}
+				};
+				$api.setStorage("notread", notread);
+			}
+		}
+
+		apiready = function() {
+			api.parseTapmode();
+			if (api.systemType != 'ios') {
+				delay = 300;
+			}
+			var user = $api.getStorage("user");
+			if (user) {
+				openWinByUser(user);
+			}
+			//如果不存在语言字典，则从服务器下载
+			//if (!$api.getStorage("dic")) {
+			//加载语言数据
+			toast.loading({
+				title : "加载中",
+				duration : 2000
+			}, function(ret) {
+				$api.get(config.server + "/appserver/getAllDic.do", function(result) {
+					result = eval('(' + result + ')');
+					if (result.success) {
+						//存储语言字典
+						$api.setStorage("dic", result.result);
+						loadDic();
+					} else {
+						alert(result.msg);
+					}
+					toast.hide();
+				});
+			});
+			//}
+			//首次访问清空 当前对话人
+			$api.setStorage("chatWith", null);
+			//如果不存在语言字典，则从服务器下载
+			//if (!$api.getStorage("dic")) {
+			//加载语言数据
+			$api.get(config.server + "/appserver/getAllDic.do", function(result) {
+				result = eval('(' + result + ')');
+				if (result.success) {
+					//存储语言字典
+					$api.setStorage("dic", result.result);
+					loadDic();
+				} else {
+					alert(result.msg);
+				}
+			});
+			//}
+		}
+		function loadDic() {
+			var dic = $api.getStorage("dic");
+			$api.byId("phoneNum").placeholder = dic['phoneNum'].dicName;
+			$api.byId("userPass").placeholder = dic['password'].dicName;
+			$api.byId("loginBtn").innerHTML = dic['login'].dicName;
+			$api.byId("teacher").innerHTML = dic['teacher'].dicName;
+			$api.byId("parent").innerHTML = dic['parent'].dicName;
+		}
+	</script>
+</html>

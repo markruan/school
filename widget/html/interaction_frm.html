@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/aui.css" />
+   
+  
+</head>
+<body>
+	
+	 <div class="aui-content aui-margin-b-15">
+        <ul class="aui-list aui-media-list" id="msgs">
+        </ul>
+    </div>
+	
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/config.js"></script>
+<script>
+	apiready=function(){
+		var notread=$api.getStorage("notread");
+		var msg=notread.msg;
+		var msgsDom=$api.byId('msgs');
+		for(var id in msg){
+			//获取用户信息
+			$api.get(config.server1 + "/relation/searchFriends.do?userNo=" + id, function(result) {
+				result = eval('(' + result + ')');
+				if (result.result) {
+				var targetUser = result.result;
+					
+					
+				var html="<li class=\"aui-list-item aui-list-item-middle\" onclick='chat(\""+targetUser.userNo+"\")'>\n" +
+					"		<div class=\"aui-media-list-item-inner\">\n" +
+					"				<div class=\"aui-list-item-media\" style=\"width: 3rem;\">\n" +
+					(msg[targetUser.userNo].count<1?'':"<div class=\"aui-badge\">"+msg[targetUser.userNo].count+"</div>\n") +
+					
+					"						<img src=\"../image/liulangnan.png\" class=\"aui-img-round aui-list-img-sm\">\n" +
+					"				</div>\n" +
+					"				<div class=\"aui-list-item-inner aui-list-item-arrow\">\n" +
+					"						<div class=\"aui-list-item-text\">\n" +
+					"							 \n" +
+					"								<div class=\"aui-list-item-title aui-font-size-16\"><span style=\"color:#0075F0\">" + targetUser.userName + "</span></div>\n" +
+					"						</div>\n" +
+					"						<div class=\"aui-list-item-text \">&nbsp;</div>\n" +
+//					"						 <div class=\"aui-list-item-text aui-font-size-12\">\n" +
+//					"								呵呵，好啊，明天带2个孩子出去。。。\n" +
+//					"						</div>\n" +
+					"				</div>\n" +
+					"		</div>\n" +
+					"</li>";
+					$api.append(msgsDom, html);	
+				}
+			});
+		}
+	}
+	
+	function chat(userNo) {
+			var delay = 0;
+			if (api.systemType != 'ios') {
+				delay = 300;
+			}
+			
+			api.openWin({
+				name : 'chat_win.html',
+				url : 'chat_win.html?targetUserNo=' + userNo,
+				bounces : false,
+				delay : delay,
+				slidBackEnabled : true,
+				vScrollBarEnabled : false
+			});
+	}
+
+
+	function closeWin(){
+        api.closeWin({
+        });
+    }
+
+</script>
+
+
+</html>

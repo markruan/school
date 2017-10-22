@@ -1,0 +1,290 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+	</head>
+	<body>
+		<header class="aui-bar aui-bar-nav" id="aui-header">
+			<a class="aui-btn aui-pull-left" > </a>
+			<div class="aui-title" id="title">
+				飞天E校通[老师端]
+			</div>
+			<a class="aui-btn aui-pull-right" id="addCircle" onclick="addCircle()" style="display: none;" >
+            <span class="aui-iconfont aui-icon-plus"></span>
+       	    </a>
+		</header>
+		<footer class="aui-bar aui-bar-tab aui-border-t" id="footer">
+			<div class="aui-bar-tab-item aui-active" tapmode>
+				<i class="aui-iconfont aui-icon-home"></i>
+				<div class="aui-bar-tab-label" id="index"></div>
+			</div>
+			<div class="aui-bar-tab-item" tapmode>
+				<i class="aui-iconfont aui-icon-my"></i>
+				<div class="aui-bar-tab-label" id="concats">
+				</div>
+			</div>
+			<div class="aui-bar-tab-item" tapmode>
+				<i class="aui-iconfont aui-icon-wechat-circle"></i>
+				<div class="aui-bar-tab-label" id="classCircle">
+				</div>
+			</div>
+			<div class="aui-bar-tab-item"  tapmode>
+				<div class="aui-dot"></div>
+				<i class="aui-iconfont aui-icon-gear"></i>
+				<div class="aui-bar-tab-label" id="configration">
+				</div>
+			</div>
+		</footer>
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript" src="../script/aui-tab.js" ></script>
+	<script type="text/javascript" src="../script/config.js" ></script>
+	<script type="text/javascript">
+		function loadFrm(name) {
+			var header = $api.byId('aui-header');
+			$api.fixStatusBar(header);
+			var headerPos = $api.offset(header);
+			var body_h = $api.offset($api.dom('body')).h;
+			var footer_h = $api.offset($api.dom('footer')).h;
+			api.openFrame({
+				name : "" + name + "",
+				url : name + '.html',
+				bounces : false,
+				rect : {
+					x : 0,
+					y : headerPos.h,
+					w : 'auto',
+					h : api.winHeight - headerPos.h - footer_h
+				},
+				reload:true
+			});
+		}
+
+		apiready = function() {
+			api.parseTapmode();
+			loadFrm("index_teacher_frm");
+			ExitApp();
+			
+			//加载语言字典
+			loadDic();
+			listen();
+		};
+		function loadDic() {
+			var dic = $api.getStorage("dic");
+			$api.byId("index").innerHTML = dic['index'].dicName;
+			$api.byId("concats").innerHTML = dic['concats'].dicName;
+			$api.byId("classCircle").innerHTML = dic['classCircle'].dicName;
+			$api.byId("configration").innerHTML = dic['configration'].dicName;
+		}
+
+		var tab = new auiTab({
+			element : document.getElementById("footer")
+		}, function(ret) {
+			$api.css($api.byId('addCircle'),'display:none');
+			
+			switch(ret.index) {
+				case 1:
+					loadFrm("index_teacher_frm");
+					document.getElementById("title").innerHTML = '飞天E校通[老师端]';
+					break;
+				case 2:
+				
+					//loadFrm("contacts");
+					var header = $api.byId('aui-header');
+					$api.fixStatusBar(header);
+					var headerPos = $api.offset(header);
+					var body_h = $api.offset($api.dom('body')).h;
+					var footer_h = $api.offset($api.dom('footer')).h;
+					api.openFrame({
+						name : "contacts",
+						url : 'contacts.html',
+						rect : {
+							x : 0,
+							y : headerPos.h,
+							w : 'auto',
+							h : api.winHeight - headerPos.h - footer_h
+						},
+						reload:true
+					});
+					
+					
+					
+					
+					
+					document.getElementById("title").innerHTML = '通讯录';
+					break;
+				case 3:
+					//loadFrm("class_frm");
+					
+					var header = $api.byId('aui-header');
+					$api.fixStatusBar(header);
+					var headerPos = $api.offset(header);
+					var body_h = $api.offset($api.dom('body')).h;
+					var footer_h = $api.offset($api.dom('footer')).h;
+					api.openFrame({
+						name : "class_frm",
+						url : 'class_frm.html',
+						rect : {
+							x : 0,
+							y : headerPos.h,
+							w : 'auto',
+							h : api.winHeight - headerPos.h - footer_h
+						},
+						reload:true
+					});
+					
+					
+					
+					document.getElementById("title").innerHTML = '班级圈';
+					$api.css($api.byId('addCircle'),'display:block');
+					break;
+				case 4:
+					loadFrm("teacher_my_frm");
+					document.getElementById("title").innerHTML = '设置';
+					break;
+			}
+		});
+		function closeWin() {
+			api.closeWin({
+			});
+		}
+
+		/**
+		 * 绑定退出事件
+		 */
+		function ExitApp() {
+			var ci = 0;
+			var time1, time2;
+			api.addEventListener({
+				name : 'keyback'
+			}, function(ret, err) {
+				if (ci == 0) {
+					time1 = new Date().getTime();
+					ci = 1;
+					api.toast({
+						msg : '再按一次返回键退出'
+					});
+				} else if (ci == 1) {
+					time2 = new Date().getTime();
+					if (time2 - time1 < 3000) {
+						api.closeWidget({
+							id : api.appId,
+							retData : {
+								name : 'closeWidget'
+							},
+							silent : true
+						});
+					} else {
+						ci = 0;
+						api.toast({
+							msg : '再按一次返回键退出'
+						});
+					}
+				}
+			});
+		}
+		
+		
+		function listen() {
+			var user = $api.getStorage("user");
+			//监听通知
+			api.addEventListener({
+				name : 'noticeclicked'
+			}, function(ret, err) {
+				//点击通知时进入对应页面
+				if (ret.value&&ret.value!='null') {
+					var delay = 0;
+					if (api.systemType != 'ios') {
+						delay = 300;
+					}
+					api.openWin({
+						name : ret.value,
+						url : ret.value,
+						bounces : false,
+						delay : delay,
+						slidBackEnabled : true,
+						vScrollBarEnabled : false
+					});
+				}
+			});
+			
+			//监听后台是否存在新的通知
+			setInterval(function() {
+				if (!$api.getStorage("chatWith")) {
+					$api.get(config.server1 + '/notification/getNotification.do?targetUserNo=' + user.userNo, function(result) {
+						result = eval('(' + result + ')');
+						if (result.success) {
+							var notis = result.result;
+							if (notis) {
+								for (var i = 0; i < notis.length; i++) {
+									api.notification({
+										notify : {
+											title : notis[i].title,
+											content : notis[i].content,
+											extra : notis[i].url
+										}
+									}, function(ret, err) {
+									});
+									
+									//判断通知类型
+									if(notis[i].url){
+										if(notis[i].url.indexOf('chat_win.html')>-1){
+											//新消息
+											var notread=$api.getStorage("notread");
+											var msg=notread.msg;
+											var sendUserNo=notis[i].url.substr(notis[i].url.indexOf('targetUserNo=')+'targetUserNo='.length);//发件人
+											if(!msg[sendUserNo]){
+												msg[sendUserNo]={"count":1};
+											}else{
+												msg[sendUserNo].count=msg[sendUserNo].count+1;
+											}
+											notread.msg=msg;
+											$api.setStorage("notread",notread);
+										}
+									}else if(notis[i].url.indexOf('review_win.html')>-1){
+											//新审批
+											var notreview=$api.getStorage("notreview");
+											if(notreview){
+												notreview++;
+											}else{
+												notreview=1;
+											}
+											$api.setStorage("notreview",notreview);
+									}
+								}
+							}
+						}
+					});
+				}
+			}, config.notiInterval);
+		}
+		
+		
+		function openWin(name){
+	        var delay = 0;
+	        if(api.systemType != 'ios'){
+	            delay = 300;
+	        }
+	        api.openWin({
+	            name: ''+name+'',
+	            url: ''+name+'_win.html',
+	            bounces:false,
+	            delay: delay,
+	            slidBackEnabled:true,
+	            vScrollBarEnabled:false
+	        });
+	    }
+	    
+		
+		/**
+		 * 发布班级圈
+		 */
+		function addCircle(){
+			openWin('addCircle');
+		}
+		
+	</script>
+</html>

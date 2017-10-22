@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>title</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css"/>
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+		<style type="text/css">
+			.user_head {
+			}
+		</style>
+	</head>
+	<body>
+		<div class="aui-content">
+			<ul class="aui-list aui-media-list">
+				<li class="aui-list-header"></li>
+				<li class="aui-list-item">
+					<div class="aui-media-list-item-inner">
+						<div class="aui-list-item-media">
+							<img src="../image/demo1.png" class="aui-img-round user_head">
+						</div>
+						<div class="aui-list-item-inner">
+							<div class="aui-list-item-text">
+								<div class="aui-list-item-title"></div>
+							</div>
+							<br />
+							<div class="aui-list-item-text">
+								<div class="aui-list-item-title" id="userName">
+								</div>
+							</div>
+							<!-- <div class="aui-list-item-text">
+								<div class="aui-list-item-title">
+									女
+									<div class="aui-label aui-label-danger">
+										师
+									</div>
+								</div>
+							</div> -->
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item">
+					<div class="aui-media-list-item-inner">
+						<div class="aui-list-item-inner">
+							<div class="aui-list-item-text">
+								<div class="aui-list-item-title">
+									手机号&nbsp; &nbsp; &nbsp; &nbsp; <span id="phoneNum"></span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item">
+					<div class="aui-media-list-item-inner">
+						<div class="aui-list-item-inner">
+							<div class="aui-list-item-text">
+								<!-- <div class="aui-list-item-title">
+									个性签名&nbsp; &nbsp; &nbsp; &nbsp;无
+								</div> -->
+							</div>
+						</div>
+					</div>
+		</li>
+		</ul>
+		<div class="aui-row">
+			<div class="aui-col-xs-1">
+				&nbsp;
+			</div>
+			<div class="aui-col-xs-10">
+				<br />
+				<div class="aui-btn aui-btn-info aui-btn-block" onclick="addFriends()">
+					加为好友
+				</div>
+			</div>
+			<div class="aui-col-xs-1">
+				&nbsp;
+			</div>
+		</div>
+		</div>
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript" src="../script/config.js"></script>
+	<script type="text/javascript" src="../script/common.js"></script>
+	<script type="text/javascript" src="../script/aui-toast.js"></script>
+	<script>
+		var targetUserNo = getParam('targetUserNo');
+		var user=$api.getStorage('user');
+		var toast = new auiToast();
+
+		apiready = function() {
+			//获取用户信息
+			
+			$api.get(config.server1 + "/relation/searchFriends.do?userNo=" + targetUserNo, function(result) {
+				result = eval('(' + result + ')');
+				if(result.result){
+					targetUser=result.result;
+					$api.byId('userName').innerHTML=targetUser.userName;
+					$api.byId('phoneNum').innerHTML=targetUser.userNo;
+				}
+   					toast.hide();
+        });
+			
+		}
+		
+		function addFriends(){
+    toast.loading({
+        title : "加载中",
+        duration : 2000
+      }, function(ret) {
+			$api.get(config.server1 + "/relation/addFriends.do?targetUserNo="+targetUserNo+"&sourceUserNo="+user.userNo, function(result) {
+				result = eval('(' + result + ')');
+				if(result.success){
+					api.toast({msg:'已发送，请等待对方接受',duration:2000});
+				}else{
+					api.toast({msg:result.msg,duration:2000});
+				}
+				   toast.hide();
+        });
+			});
+		
+		}
+	</script>
+</html>

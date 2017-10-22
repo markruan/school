@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>title</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css" />
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+
+	</head>
+
+	<body>
+		<div class="aui-content aui-margin-b-15">
+			<ul class="aui-list aui-form-list">
+				<li class="aui-list-header">推送设置</li>
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label">
+							作业推送
+						</div>
+						<div class="aui-list-item-input">
+							<input type="checkbox" class="aui-switch  aui-pull-right" checked>
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label">
+							考勤推送
+						</div>
+						<div class="aui-list-item-input">
+							<input type="checkbox" class="aui-switch  aui-pull-right" checked>
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label">
+							消费推送
+						</div>
+						<div class="aui-list-item-input">
+							<input type="checkbox" class="aui-switch  aui-pull-right" checked>
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label">
+							聊天/通知推送
+						</div>
+						<div class="aui-list-item-input">
+							<input type="checkbox" class="aui-switch  aui-pull-right" checked>
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label">
+							成绩推送
+						</div>
+						<div class="aui-list-item-input">
+							<input type="checkbox" class="aui-switch  aui-pull-right" checked>
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-header">隐私设置</li>
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner">
+						<div class="aui-list-item-label">
+							空间权限
+						</div>
+						<div class="aui-list-item-input">
+							<select id="circleAuth">
+								<option value="2">所有人可见</option>
+								<option value="1">好友可见</option>
+								<option value="0">不公开</option>
+							</select>
+						</div>
+					</div>
+				</li>
+
+				<li class="aui-list-item">
+					<div class="aui-list-item-inner aui-list-item-center aui-list-item-btn">
+						<div class="aui-btn aui-btn-info aui-margin-r-5" onclick="save()">保存设置</div>
+					</div>
+				</li>
+
+			</ul>
+
+		</div>
+
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript" src="../script/config.js"></script>
+	<script type="text/javascript" src="../script/aui-toast.js"></script>
+	<script>  
+	var toast = new auiToast();
+	var user=$api.getStorage('user');
+	
+    function openWin(name){
+        var delay = 0;
+        if(api.systemType != 'ios'){
+            delay = 300;
+        }
+        api.openWin({
+            name: ''+name+'',
+            url: ''+name+'_win.html',
+            bounces:false,
+            delay: delay,
+            slidBackEnabled:true,
+            vScrollBarEnabled:false
+        });
+    }
+    
+    
+    function save(){
+    	var circleAuth= document.getElementById('circleAuth').value;
+    	var userId=user.userId;
+    	
+    	
+    	toast.loading({
+			title : "加载中",
+			duration : 2000
+		}, function(ret) {
+			var url = config.server1 + "/userConfig/changeAuth.do?userId="+userId+"&circleAuth="+circleAuth;
+			api.ajax({
+				url : url,
+				method : 'post',
+				data : {
+					files : {
+						
+					},
+					values : {
+						
+					}
+				}
+			}, function(ret, err) {
+				if (ret) {
+					if (ret.success) {
+						api.toast({
+							msg : "操作成功",
+							duration : 2000
+						});
+					} else {
+						api.toast({
+							msg : result.msg,
+							duration : 2000
+						});
+					}
+					
+				} 
+				toast.hide();
+			});
+		});
+    }
+</script>
+
+</html>

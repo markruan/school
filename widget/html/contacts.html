@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>title</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css"/>
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+	</head>
+	<body>
+		<div class="aui-content aui-margin-b-15">
+			<div class="aui-searchbar" id="search">
+				<div class="aui-searchbar-input aui-border-radius" tapmode >
+					<i class="aui-iconfont aui-icon-search"></i>
+					<form action="javascript:search();">
+						<input type="search" placeholder="请输入手机号" id="search-input">
+					</form>
+				</div>
+				<div class="aui-btn aui-btn-info" tapmod onclick="search()">
+					搜索
+				</div>
+			</div>
+			
+			
+			<ul class="aui-list aui-media-list" id="friends">
+				
+			</ul>
+			
+			<!--
+			<ul class="aui-list aui-media-list">
+				<li class="aui-list-header">
+					老师
+				</li>
+				<li class="aui-list-item aui-list-item-middle">
+					<div class="aui-media-list-item-inner">
+						<div class="aui-list-item-media" style="width: 3rem;">
+							<img src="../image/demo5.png" class="aui-img-round aui-list-img-sm">
+						</div>
+						<div class="aui-list-item-inner aui-list-item-arrow" onclick="openWin('contactsaddlist')">
+							<div class="aui-list-item-text">
+								<div class="aui-list-item-title aui-font-size-14">
+									程丹（老师）
+								</div>
+							</div>
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item aui-list-item-middle">
+					<div class="aui-media-list-item-inner">
+						<div class="aui-list-item-media" style="width: 3rem;">
+							<img src="../image/liulangnan.png" class="aui-img-round aui-list-img-sm">
+						</div>
+						<div class="aui-list-item-inner aui-list-item-arrow" onclick="openWin('contactsaddlist')">
+							<div class="aui-list-item-text">
+								<div class="aui-list-item-title aui-font-size-14">
+									邬登城（数学老师）
+								</div>
+							</div>
+						</div>
+					</div>
+				</li>
+			</ul>
+			<ul class="aui-list aui-media-list">
+				<li class="aui-list-header">
+					学生家长
+				</li>
+				<li class="aui-list-item aui-list-item-middle">
+					<div class="aui-media-list-item-inner">
+						<div class="aui-list-item-media" style="width: 3rem;">
+							<img src="../image/demo5.png" class="aui-img-round aui-list-img-sm">
+						</div>
+						<div class="aui-list-item-inner aui-list-item-arrow" onclick="openWin('contactsaddlist')">
+							<div class="aui-list-item-text">
+								<div class="aui-list-item-title aui-font-size-14">
+									杨立波家
+								</div>
+							</div>
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item aui-list-item-middle">
+					<div class="aui-media-list-item-inner">
+						<div class="aui-list-item-media" style="width: 3rem;">
+							<img src="../image/liulangnan.png" class="aui-img-round aui-list-img-sm">
+						</div>
+						<div class="aui-list-item-inner aui-list-item-arrow" >
+							<div class="aui-list-item-text">
+								<div class="aui-list-item-title aui-font-size-14">
+									小明家
+								</div>
+							</div>
+						</div>
+					</div>
+				</li>
+			</ul>
+			-->
+		</div>
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript" src="../script/config.js"></script>
+	<script type="text/javascript" src="../script/aui-toast.js"></script>
+	<script type="text/javascript">
+		 
+		apiready = function() {
+			api.parseTapmode();
+			user=$api.getStorage("user");
+			
+			//设置下拉刷新
+			api.setRefreshHeaderInfo({
+			    loadingImg: 'widget://image/refresh.png',
+			    bgColor: '#ccc',
+			    textColor: '#fff',
+			    textDown: '下拉刷新...',
+			    textUp: '松开刷新...'
+			}, function(ret, err) {
+			    //在这里从服务器加载数据，加载完成后调用api.refreshHeaderLoadDone()方法恢复组件到默认状态
+				getMyFriends();
+			});
+			getMyFriends();
+			//setInterval(getMyFriends,10000);
+		}
+		
+		
+		function search(){
+			var targetUserNo=$api.byId('search-input').value;
+			if(targetUserNo){
+			
+			if(targetUserNo==user.userNo){
+					api.toast({msg:'不能添加自己为好友',duration:1000});
+					return;
+			}
+				//验证是否已经是好友
+				var isFriend=false;
+				
+				$api.get(config.server1 + "/relation/getMyFriends.do?userNo="+user.userNo,function(result) {
+				result = eval('(' + result + ')');
+				
+					//遍历显示我的好友
+					if(result.success){
+						friends=result.result;
+						
+						if(friends){
+							for(var i=0;i<friends.length;i++){
+								if(friends[i].userNo==targetUserNo){
+									//是好友
+									isFriend=true;
+									api.toast({
+	                                    msg:'已经是您的好友了',
+	                                    duration:1000
+                                    });
+                                    
+                                   
+									break;
+								}
+							}
+						}
+					}
+					
+					if(!isFriend){
+						//检查是否存在该用户信息
+						$api.get(config.server1 + "/relation/searchFriends.do?userNo=" + targetUserNo, function(result) {
+							result = eval('(' + result + ')');
+							if(!result.result){
+								//不存在该用户信息
+								api.toast({msg:'不存在该用户',duration:1000});
+							}else{
+								//不是好友则进添加页面
+								openWin('contactsadd_win.html?targetUserNo='+targetUserNo);
+							}
+						});
+					
+					}
+				});
+				
+			}
+			
+		}
+		
+		
+		
+		function openWin(url) {
+			var delay = 0;
+			if (api.systemType != 'ios') {
+				delay = 300;
+			}
+			api.openWin({
+				name : url,
+				url : url,
+				bounces : false,
+				delay : delay,
+				slidBackEnabled : true,
+				vScrollBarEnabled : false
+			});
+		}
+		
+		/**
+		 *获取我的好友 
+		 */
+		function getMyFriends(){
+			var toast = new auiToast();
+			toast.loading({
+        title : "加载中",
+        duration : 2000
+      }, function(ret) {
+			
+			$api.get(config.server1 + "/relation/getMyFriends.do?userNo="+user.userNo,function(result) {
+				result = eval('(' + result + ')');
+				
+				//遍历显示我的好友
+				if(result.success){
+					friends=result.result;
+					if(friends){
+					$api.byId('friends').innerHTML='';
+					
+						for(var i=0;i<friends.length;i++){
+							var html="<li class=\"aui-list-item aui-list-item-middle\">\n" +
+		"					<div class=\"aui-media-list-item-inner\">\n" +
+		"						<div class=\"aui-list-item-media\" style=\"width: 3rem;\">\n" +
+		"							<img id='"+friends[i].userId+"' class='photo' src=\"../image/demo4.png\" class=\"aui-img-round aui-list-img-sm\">\n" +
+		"						</div>\n" +
+		"						<div class=\"aui-list-item-inner aui-list-item-arrow\" onclick=\"openWin('contactslist_win.html?targetUserNo="+friends[i].userNo+"')\">\n" +
+		"							<div class=\"aui-list-item-text\">\n" +
+		"								<div class=\"aui-list-item-title aui-font-size-14\">\n" +
+		"									"+friends[i].userName+"\n" +
+		"								</div>\n" +
+		"							</div>\n" +
+		"						</div>\n" +
+		"					</div>\n" +
+		"				</li>";
+		
+						$api.append($api.byId('friends'), html);
+						
+						}
+						
+						//加载头像
+						var photos=document.getElementsByClassName('photo');
+						for(var i in photos){
+							if(photos[i].id){
+								loadPhoto(photos[i].id);
+							}
+						}
+
+					}
+				}
+			 toast.hide();
+			 api.refreshHeaderLoadDone();
+			});
+		});
+		
+		}
+		
+		function loadPhoto(userid){
+			var url=config.server1 + "/sysuser/findPhotoByUserId.do?userId="+userid;
+			$api.get(url, function(result) {
+					result = eval('(' + result + ')');
+					if(result.success&&result.result){
+						if(result.result.photoId){
+							$api.byId(userid).src=(config.fileUrl+"/"+result.result.photoId);
+						}
+					}			
+			});
+		
+		}
+		
+	</script>
+</html>

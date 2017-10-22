@@ -1,0 +1,236 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+	</head>
+	<body>
+		<header class="aui-bar aui-bar-nav" id="aui-header">
+			<a class="aui-btn aui-pull-left" tapmode onclick="closeWin()"> <span class="aui-iconfont aui-icon-left"></span> </a>
+			<div class="aui-title" id="chatwith"></div>
+		</header>
+		<footer class="aui-bar aui-bar-tab aui-margin-t-15 aui-margin-b-15">
+			<!--
+			<div class="aui-searchbar" id="search">
+			<div class="aui-searchbar-input aui-border-radius">
+			<i class="aui-iconfont aui-icon-search"></i>
+			<input type="search" placeholder="请输入搜索内容" id="search-input">
+			<div class="aui-searchbar-clear-btn">
+			<i class="aui-iconfont aui-icon-close"></i>
+			</div>
+			</div>
+			<div class="aui-searchbar-btn" tapmode>
+			取消
+			</div>
+			</div>
+			-->
+		</footer>
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript" src="../script/common.js"></script>
+	<script type="text/javascript" src="../script/config.js"></script>
+	<script type="text/javascript">
+		var user=$api.getStorage("user");
+		apiready = function() {
+			chatWith = getParam("targetUserNo");
+			//取消当前人的未读消息显示
+			var notread = $api.getStorage("notread");
+			var msg = notread.msg;
+			if (msg[chatWith]) {
+				msg[chatWith].count = 0;
+			}
+			notread.msg = msg;
+			$api.setStorage("notread", notread);
+			// 获取当前聊天人的信息
+			$api.get(config.server1 + "/relation/searchFriends.do?userNo=" + chatWith, function(result) {
+				result = eval('(' + result + ')');
+				if (result.result) {
+					targetUser = result.result;
+					$api.byId('chatwith').innerHTML = "与" + targetUser.userName + "聊天";
+					//存储当前聊天人
+					$api.setStorage("chatWith", chatWith);
+					$api.setStorage("chatWithName", targetUser.userName);
+					api.parseTapmode();
+					var header = $api.byId('aui-header');
+					$api.fixStatusBar(header);
+					var headerPos = $api.offset(header);
+					var footer_h = $api.offset($api.dom('footer')).h;
+					api.openFrame({
+						name : 'chat_frm',
+						url : 'chat_frm.html',
+						bounces : false,
+						rect : {
+							x : 0,
+							y : headerPos.h,
+							w : 'auto',
+							h : api.winHeight - headerPos.h - footer_h - 100
+						}
+					});
+					loadMsgBox();
+				}
+			});
+			back();
+		};
+		//监听返回键
+		function back() {
+			api.addEventListener({
+				name : 'keyback'
+			}, function(ret, err) {
+				closeWin();
+			});
+		}
+
+		function closeWin() {
+			api.closeFrame({
+				name : 'chat_frm'
+			});
+			$api.setStorage("chatWith", null);
+			api.closeWin({});
+		}
+
+		function loadMsgBox() {
+			//聊天
+			UIChatBox = api.require('UIChatBox');
+			UIChatBox.open({
+				placeholder : '',
+				maxRows : 4,
+				emotionPath : 'widget://res/img/emotion',
+				texts : {
+					recordBtn : {
+						normalTitle : '按住说话',
+						activeTitle : '松开结束'
+					},
+					sendBtn : {
+						title : '发送'
+					}
+				},
+				styles : {
+					inputBar : {
+						borderColor : '#d9d9d9',
+						bgColor : '#f2f2f2'
+					},
+					inputBox : {
+						borderColor : '#B3B3B3',
+						bgColor : '#FFFFFF'
+					},
+					emotionBtn : {
+						normalImg : 'widget://res/img/chatBox_face1.png'
+					},
+					keyboardBtn : {
+						normalImg : 'widget://res/img/chatBox_key1.png'
+					},
+					speechBtn : {
+						normalImg : 'widget://res/img/record.png'
+					},
+					recordBtn : {
+						normalBg : '#c4c4c4',
+						activeBg : '#999999',
+						color : '#000',
+						size : 14
+					},
+					indicator : {
+						target : 'both',
+						color : '#c4c4c4',
+						activeColor : '#9e9e9e'
+					},
+					sendBtn : {
+						titleColor : '#FFFFFF',
+						bg : '#03a9f4',
+						activeBg : '#46a91e',
+						titleSize : 14
+					}
+				}
+			}, function(ret, err) {
+				if (ret) {
+					if (ret.eventType == 'send') {
+						if(ret.msg ){
+							user = $api.getStorage("user");
+							$api.get(config.server1 + '/msg/send.do?sendUserNo=' + user.userNo + '&content=' + ret.msg + "&targetUserNo=" + chatWith, function(result) {
+								result = eval('(' + result + ')');
+								if (result.success) {
+									$api.setStorage("tmpMsg", ret.msg);
+								}
+							});
+						}
+					}
+				} else {
+					alert(JSON.stringify(err));
+				}
+			});
+			listenPress();
+			listenPressCancel();
+		}
+
+		//按下录音键
+		function listenPress() {
+			//监听录音
+			UIChatBox.addEventListener({
+				target : 'recordBtn',
+				name : 'press'
+			}, function(ret, err) {
+				api.startRecord({
+					path : 'fs://msg.amr'
+				});
+			});
+		}
+
+		//松开录音键
+		function listenPressCancel() {
+			UIChatBox.addEventListener({
+				target : 'recordBtn',
+				name : 'press_cancel'
+			}, function(ret, err) {
+				api.stopRecord(function(ret, err) {
+					
+					if (ret) {
+						var path = ret.path;
+						//上传文件
+						api.ajax({
+							url : config.server1 + '/msg/sendRecord.do',
+							method : 'post',
+							data : {
+								files : {
+									file : path
+								},
+								values : {
+									sendUserNo : user.userNo,
+									targetUserNo:chatWith
+								}
+							}
+						}, function(ret, err) {
+							if (ret) {
+								if (ret.success) {
+									$api.setStorage("tmpMsg", ret.result);
+								} else {
+									alert(ret.msg);
+								}
+							} else {
+								api.alert("网络连接失败");
+							}
+					        //清空录音文件
+					        api.writeFile({path: path,data: ''}, function(ret, err) {});
+						});
+						//	          api.startPlay({
+						//				    path: path
+						//				}, function(ret, err) {
+						//				    if (ret) {
+						//				        //清空录音文件
+						//				        api.writeFile({path: path,data: ''}, function(ret, err) {});
+						//
+						//				    } else {
+						//				        alert(JSON.stringify(err));
+						//				    }
+						//				});
+						//
+						//
+					}
+				});
+			});
+		}
+		
+		
+		
+	</script>
+</html>

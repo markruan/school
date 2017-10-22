@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>title</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css" />
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+		<style>
+			body {}
+		</style>
+	</head>
+
+	<body>
+		
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript">
+		
+	
+		apiready = function() {
+			
+		};
+		
+		function uploadPhoto() {
+			var cameraTool = api.require('cameraTool');
+			cameraTool.openCamera(function(ret, err) {
+				//				var FNImageClip = api.require('FNImageClip');
+				//				alert(ret.imgPath);
+				//				FNImageClip.save({
+				//					destPath : ret.imgPath,
+				//					copyToAlbum : false,
+				//					quality : 1
+				//				}, function(ret, err) {
+				//					if (ret) {
+				//						alert(JSON.stringify(ret));
+				//					} else {
+				//						alert(JSON.stringify(err));
+				//					}
+				//				});
+				var FNImageClip = api.require('FNImageClip');
+				FNImageClip.open({
+					rect : {
+						x : 0,
+						y : 0,
+						w : api.winWidth,
+						h : api.winHeight
+					},
+					srcPath : ret.imgPath,
+					style : {
+						mask : '#888',
+						clip : {
+							w : 100,
+							h : 100,
+							x : 50,
+							y : 50,
+							borderColor : '#0f0',
+							borderWidth : 1,
+							appearance : 'rectangle'
+						}
+					},
+					fixedOn : api.frameName
+				}, function(ret, err) {
+					if (ret) {
+						alert(JSON.stringify(ret));
+					} else {
+						alert(JSON.stringify(err));
+					}
+				});
+			});
+		}
+		
+		
+		
+	</script>
+
+</html>

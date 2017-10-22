@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>title</title>
+		<link rel="stylesheet" type="text/css" href="../css/api.css"/>
+		<link rel="stylesheet" type="text/css" href="../css/aui.css" />
+	</head>
+	<body>
+		<div class="aui-content">
+			
+			<ul class="aui-list aui-media-list" id="exams">
+				<li class="aui-list-item">
+					<div class="aui-media-list-item-inner">
+						<div class="aui-list-item-inner">
+							<div class="aui-list-item-text">
+								<div class="aui-list-item-title" id="title">
+									
+								</div>
+							</div>
+						</div>
+					</div>
+				</li>
+				<div class="aui-content-padded">
+					<p>
+						考试科目：<span id="subjects"></span>
+					</p>
+					<p id="class">
+					</p>
+					<p>
+						考试时间：<span id="time"></span>
+					</p>
+				</div>
+				<li class="aui-list-item">
+					<div class="aui-media-list-item-inner">
+						<div class="aui-list-item-media">
+							<div class="aui-text-center" style="width: 80px;height: 80px;background: yellow;font-size: 60px;padding: 2px;">
+								<font color="white"  id="classTotalOrder"></font>
+							</div>
+						</div>
+						<div class="aui-list-item-inner">
+							<div class="aui-list-item-text">
+								<div class="aui-list-item-title">
+									个人总成绩：<span style="color: #DD191B" id="totalCount"></span>
+								</div>
+							</div>
+							<div class="aui-list-item-text">
+								<div class="aui-list-item-title">
+									班级总成绩平均分：<span style="color: #DD191B" id="classTotalAvg"></span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</li>
+				<li class="aui-list-item">
+					<div class="aui-row aui-row-padded">
+						<div class="aui-col-xs-2">
+							<div class="aui-list-item-text">
+								科目
+							</div>
+						</div>
+						<div class="aui-col-xs-2">
+							<div class="aui-list-item-text">
+								成绩
+							</div>
+						</div>
+						<div class="aui-col-xs-2">
+							<div class="aui-list-item-text">
+								总分
+							</div>
+						</div>
+						<div class="aui-col-xs-3">
+							<div class="aui-list-item-text">
+								班级平均分
+							</div>
+						</div>
+						<div class="aui-col-xs-3">
+							<div class="aui-list-item-text">
+								班级排名
+							</div>
+						</div>
+					</div>
+				</li>
+				
+			</ul>
+		</div>
+	</body>
+	<script type="text/javascript" src="../script/api.js"></script>
+	<script type="text/javascript" src="../script/config.js"></script>
+	<script>
+		var user=$api.getStorage("user");
+		apiready=function(){
+			loadData();
+		}
+		
+		function loadData(){
+			$api.get(config.server1 + '/exam/getLastExam.do?userId='+user.userId, function(result) {
+					result = eval('(' + result + ')');
+					if(result.success){
+						if(result.result){
+							var examResult=result.result;
+							$api.html($api.byId('title'), examResult.title);
+							$api.html($api.byId('class'), examResult['class']);
+							$api.html($api.byId('time'), examResult['time']);
+							$api.html($api.byId('classTotalAvg'), examResult['classTotalAvg']+"分");
+							$api.html($api.byId('classTotalOrder'), examResult['classTotalOrder']);
+							
+							var examMaps=examResult['examMaps'];
+							var subjects="";
+							var examsDom=$api.byId('exams');
+							var totalCount=0;
+							for(var i in examMaps){
+								
+								var html="<li class=\"aui-list-item\">\n" +
+									"	<div class=\"aui-row aui-row-padded\">\n" +
+									"		<div class=\"aui-col-xs-2\">\n" +
+									"			<div class=\"aui-list-item-text\">\n" +
+									"				"+examMaps[i].subject+"\n" +
+									"			</div>\n" +
+									"		</div>\n" +
+									"		<div class=\"aui-col-xs-2\">\n" +
+									"			<div class=\"aui-list-item-text\">\n" +
+									"				"+examMaps[i].count+"\n" +
+									"			</div>\n" +
+									"		</div>\n" +
+									"		<div class=\"aui-col-xs-2\">\n" +
+									"			<div class=\"aui-list-item-text\">\n" +
+									"				"+examMaps[i].totalCount+"\n" +
+									"			</div>\n" +
+									"		</div>\n" +
+									"		<div class=\"aui-col-xs-3\">\n" +
+									"			<div class=\"aui-list-item-text\">\n" +
+									"				"+examMaps[i].avg+"\n" +
+									"			</div>\n" +
+									"		</div>\n" +
+									"		<div class=\"aui-col-xs-3\">\n" +
+									"			<div class=\"aui-list-item-text\">\n" +
+									"				"+examMaps[i].order+"\n" +
+									"			</div>\n" +
+									"		</div>\n" +
+									"	</div>\n" +
+									"</li>";
+								totalCount+=examMaps[i].count;
+								$api.append(examsDom, html);
+								subjects+=examMaps[i].subject+"、";
+							}
+							$api.html($api.byId('totalCount'),totalCount+"分");
+							subjects=subjects.substr(0,subjects.length-1);//去掉多余符号
+							$api.html($api.byId('subjects'), subjects);
+						}
+					}
+			});		
+		}
+	</script>
+</html>

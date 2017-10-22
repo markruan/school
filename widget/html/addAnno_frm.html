@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/aui.css" />
+  
+</head>
+<body>
+	<div class="aui-content aui-margin-b-15">
+        <ul class="aui-list aui-form-list">
+        	<li class="aui-list-header">填写通知信息</li>
+        	
+        	<li class="aui-list-item">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-label">
+                		标题
+                    </div>
+                    <div class="aui-list-item-input">
+                       <input type="text" id="title" />
+                    </div>
+                    
+                </div>
+            </li>
+            
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-label">
+                		内容
+                    </div>
+                    <div class="aui-list-item-input">
+                       <textarea id="content"></textarea>
+                    </div>
+                    
+                </div>
+            </li>
+             
+            
+            <li class="aui-list-item">
+                <div class="aui-list-item-inner aui-list-item-center aui-list-item-btn">
+                    <div class="aui-btn aui-btn-info aui-margin-r-5" onclick="addCircle()">发布</div>
+                    <div class="aui-btn aui-btn-danger aui-margin-l-5" onclick="closeWin()">取消</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/aui-toast.js"></script>
+<script type="text/javascript" src="../script/config.js"></script>
+<script>
+	var user=$api.getStorage("user");
+     var toast = new auiToast();
+   apiready = function(){
+        api.parseTapmode();
+    }
+    
+    function addCircle(){
+    toast.loading({
+        title : "加载中",
+        duration : 2000
+      }, function(ret) {
+
+    	var title=$api.byId('title').value;
+    	var content=$api.byId('content').value;
+    	
+        if(content.length==0){
+            api.toast({msg: "请输入内容",duration: 2000});
+        }else{
+    	var url=config.server1 + "/announcement/anno.do?userId="+user.userId+"&title="+title+"&content="+content;
+		$api.get(url, function(result) {
+				result = eval('(' + result + ')');
+				if(result.success){
+					api.toast({msg: "发布成功",duration: 2000});
+				}else{
+					api.toast({msg:result.msg,duration: 2000});
+				}
+            toast.hide();
+            closeWin();
+        });
+        }
+		});
+    }
+    
+    function closeWin() {
+			api.closeWin({
+			});
+		}
+</script>
+</html>

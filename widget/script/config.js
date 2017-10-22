@@ -1,0 +1,3 @@
+//var config={'server':'http://192.168.0.6:8080/school_back','server1':'http://192.168.0.6:8080/school','fileUrl':'http://192.168.0.6:8080/school',notiInterval:3000}
+var config={'server':'http://119.28.12.117:8080','server1':'http://119.28.12.117:8099','fileUrl':'http://119.28.12.117',notiInterval:3000}
+//var config={'server':'http://silenceTest.nat123.net','server1':'http://silenceSSH.nat123.net','fileUrl':'http://192.168.0.6:8099',notiInterval:3000}
